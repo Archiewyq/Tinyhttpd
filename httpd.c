@@ -22,7 +22,9 @@
 #include <strings.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifndef LINUX
 #include <pthread.h>
+#endif
 #include <sys/wait.h>
 #include <stdlib.h>
 
@@ -479,7 +481,9 @@ int main(void)
  int client_sock = -1;
  struct sockaddr_in client_name;
  int client_name_len = sizeof(client_name);
+#ifndef LINUX
  pthread_t newthread;
+#endif
 
  server_sock = startup(&port);
  printf("httpd running on port %d\n", port);
@@ -491,9 +495,13 @@ int main(void)
                        &client_name_len);
   if (client_sock == -1)
    error_die("accept");
+#ifndef LINUX
  /* accept_request(client_sock); */
  if (pthread_create(&newthread , NULL, accept_request, client_sock) != 0)
    perror("pthread_create");
+#else
+ accept_request(client_sock);
+#endif
  }
 
  close(server_sock);
